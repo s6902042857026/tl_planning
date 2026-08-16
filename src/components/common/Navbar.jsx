@@ -36,36 +36,34 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getNavLinks = () => {
-    const base = [
-      { id: 'dashboard', label: 'แดชบอร์ดภาพรวม', icon: BarChart3 },
-      { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal }
-    ];
-
     if (currentUser.role === 'user') {
       return [
-        ...base,
-        { id: 'my_submissions', label: 'สถานะการส่งงาน', icon: FileText }
+        { id: 'my_submissions', label: 'สถานะการส่งงานของฉัน', icon: FileText },
+        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal }
       ];
     }
 
     if (currentUser.role === 'admin') {
       return [
-        ...base,
         { id: 'review_table', label: 'ตรวจสอบและอนุมัติเอกสาร', icon: CheckCircle2 },
         { id: 'missing_tracker', label: 'ติดตามผู้ยังไม่ส่งงาน', icon: Bell },
+        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal },
         { id: 'kpi_manager', label: 'จัดการหมวดหมู่ตัวชี้วัด', icon: SlidersHorizontal }
       ];
     }
 
     if (currentUser.role === 'executive') {
       return [
-        ...base,
+        { id: 'dashboard', label: 'แดชบอร์ดภาพรวม', icon: BarChart3 },
+        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal },
         { id: 'executive_pdca', label: 'สรุปผลสัมฤทธิ์ PDCA & งบประมาณ', icon: BarChart3 },
         { id: 'awards_mou', label: 'ผลงาน รางวัล & MOU', icon: Award }
       ];
     }
 
-    return base;
+    return [
+      { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal }
+    ];
   };
 
   const navLinks = getNavLinks();
@@ -118,9 +116,14 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
           
           {/* Brand Logo & Title */}
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-amber-500 p-0.5 shadow-md flex items-center justify-center flex-shrink-0">
-              <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-                <img src="/favicon.svg" alt="TTC Planning Logo" className="w-8 h-8" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-amber-500 p-0.5 shadow-md flex items-center justify-center flex-shrink-0">
+              <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/logo.png" 
+                  alt="วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์" 
+                  onError={(e) => { e.target.onerror = null; e.target.src = '/favicon.svg'; }}
+                  className="w-10 h-10 object-contain" 
+                />
               </div>
             </div>
             <div>
@@ -129,8 +132,8 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
                   ระบบติดตามตัวชี้วัด ฝ่ายยุทธศาสตร์และแผนงาน
                 </h1>
               </div>
-              <p className="text-xs text-slate-500 font-normal">
-                Vocational Strategic & KPI Tracking System (TTC Planning)
+              <p className="text-xs text-brand-700 font-medium">
+                วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์ (สอศ.)
               </p>
             </div>
           </div>

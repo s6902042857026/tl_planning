@@ -23,9 +23,23 @@ import { Sparkles, RefreshCw, ExternalLink } from 'lucide-react';
 export default function App() {
   const { currentUser, tvMode, setTvMode, showToast } = useAuth();
   
-  const [activeTab, setActiveTab] = useState('dashboard');
+  // Default landing tab based on role
+  const getDefaultTab = (role) => {
+    if (role === 'executive') return 'dashboard';
+    if (role === 'admin') return 'review_table';
+    return 'my_submissions';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => getDefaultTab(currentUser.role));
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Automatically adjust active tab whenever role changes or if unauthorized role tries to view executive dashboard
+  useEffect(() => {
+    if (currentUser.role !== 'executive' && (activeTab === 'dashboard' || activeTab === 'executive_pdca' || activeTab === 'awards_mou')) {
+      setActiveTab(getDefaultTab(currentUser.role));
+    }
+  }, [currentUser.role]);
 
   // Modal States
   const [useCaseModalOpen, setUseCaseModalOpen] = useState(false);
@@ -112,7 +126,7 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {activeTab === 'dashboard' && (
+        {activeTab === 'dashboard' && currentUser.role === 'executive' && (
           <ExecutiveDashboard
             submissions={submissions}
             onSelectDomain={(d) => setSelectedDomainForDetail(d)}
@@ -180,9 +194,14 @@ export default function App() {
       <footer className="bg-white border-t border-slate-200 mt-12 py-6 text-xs text-slate-500 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img src="/favicon.svg" alt="TTC Logo" className="w-6 h-6" />
+            <img
+              src="/logo.png"
+              alt="วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์"
+              onError={(e) => { e.target.onerror = null; e.target.src = '/favicon.svg'; }}
+              className="w-10 h-10 object-contain rounded-full"
+            />
             <div>
-              <span className="font-bold text-slate-700">ฝ่ายยุทธศาสตร์และแผนงาน สังกัดสำนักงานคณะกรรมการการอาชีวศึกษา (สอศ.)</span>
+              <span className="font-bold text-slate-800">ฝ่ายยุทธศาสตร์และแผนงาน วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</span>
               <p className="text-[11px] text-slate-400">ระบบติดตามและประเมินผลตัวชี้วัด 5 ด้านหลัก (TTC Planning KPI System)</p>
             </div>
           </div>
