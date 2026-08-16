@@ -119,7 +119,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-amber-500 p-0.5 shadow-md flex items-center justify-center flex-shrink-0">
               <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/logo.png" 
+                  src="/logotl.png" 
                   alt="วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์" 
                   onError={(e) => { e.target.onerror = null; e.target.src = '/favicon.svg'; }}
                   className="w-10 h-10 object-contain" 
