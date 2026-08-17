@@ -6,7 +6,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Local storage cache for persistence
+  // Local storage cache for persistence (null by default -> must login first)
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('ttc_auth_user');
     if (saved) {
@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
         console.error('Failed to parse auth user', e);
       }
     }
-    return INITIAL_USERS[0]; // Default user for initial load
+    return null; // Require login first
   });
 
   const [session, setSession] = useState(null);
@@ -132,33 +132,54 @@ export function AuthProvider({ children }) {
   };
 
   /**
-   * เข้าสู่ระบบด้วย Email & Password
+   * เข้าสู่ระบบด้วย Email/Username & Password
    */
   const login = async ({ email, password }) => {
+    const inputIdentifier = email.trim().toLowerCase();
+    
+    // Convert common usernames to mock email if no domain provided
+    let normalizedEmail = inputIdentifier;
+    if (!inputIdentifier.includes('@')) {
+      if (inputIdentifier === 'admin' || inputIdentifier === 'admin.plan') {
+        normalizedEmail = 'admin.plan@ttc.ac.th';
+      } else if (inputIdentifier === 'director' || inputIdentifier === 'executive') {
+        normalizedEmail = 'director@ttc.ac.th';
+      } else if (inputIdentifier === 'somkid' || inputIdentifier === 'user') {
+        normalizedEmail = 'somkid@ttc.ac.th';
+      } else {
+        normalizedEmail = `${inputIdentifier}@ttc.ac.th`;
+      }
+    }
+
     // 1. If Supabase is configured, use Supabase Auth
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: normalizedEmail,
         password
       });
 
-      if (error) {
-        throw new Error(error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+      if (!error && data?.user) {
+        setSession(data.session);
+        await fetchUserProfile(data.user);
+        showToast(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${data.user.email}`, 'success');
+        return data.user;
       }
 
-      setSession(data.session);
-      await fetchUserProfile(data.user);
-      showToast(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${data.user.email}`, 'success');
-      return data.user;
+      // If Supabase authentication fails, check local accounts fallback
+      console.warn('Supabase auth attempt message:', error?.message);
     }
 
-    // 2. Local Fallback Mode
+    // 2. Local Fallback Mode (Check mock users & registered users)
     const localUsers = JSON.parse(localStorage.getItem('ttc_registered_users') || '[]');
     const allUsers = [...INITIAL_USERS, ...localUsers];
-    const found = allUsers.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    const found = allUsers.find(u => 
+      u.email.toLowerCase() === normalizedEmail || 
+      u.email.toLowerCase() === inputIdentifier ||
+      (u.name && u.name.toLowerCase().includes(inputIdentifier))
+    );
 
     if (!found) {
-      throw new Error('ไม่พบบัญชีผู้ใช้นี้ในระบบ กรุณาสมัครสมาชิกใหม่ หรือเลือกทดสอบแบบ Demo');
+      throw new Error('อีเมล/ชื่อผู้ใช้ หรือรหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบหรือสมัครสมาชิกใหม่');
     }
 
     setCurrentUser(found);

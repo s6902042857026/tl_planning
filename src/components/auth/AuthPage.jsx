@@ -15,18 +15,21 @@ import {
   Layers,
   FileCheck2,
   Tv,
-  Briefcase
+  Briefcase,
+  HelpCircle,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { DEPARTMENTS, KPI_DOMAINS } from '../../data/kpiStructure';
 
 export default function AuthPage({ onOpenUseCaseModal }) {
-  const { login, register, fastDemoLogin, isSupabaseConfigured, getRoleLabel } = useAuth();
+  const { login, register, isSupabaseConfigured } = useAuth();
 
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showDefaultAccounts, setShowDefaultAccounts] = useState(false);
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -49,7 +52,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
     e.preventDefault();
     setErrorMessage('');
     if (!loginForm.email || !loginForm.password) {
-      setErrorMessage('กรุณากรอกอีเมลและรหัสผ่านให้ครบถ้วน');
+      setErrorMessage('กรุณากรอกอีเมล/ชื่อผู้ใช้ และรหัสผ่าน');
       return;
     }
 
@@ -99,8 +102,13 @@ export default function AuthPage({ onOpenUseCaseModal }) {
     }
   };
 
+  const fillLoginForm = (email, pwd = '••••••••') => {
+    setLoginForm({ email, password: 'password123' });
+    setErrorMessage('');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-kanit">
+    <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-kanit">
       <div className="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         
         {/* Left Side: College & Strategic System Branding */}
@@ -135,7 +143,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
               </span>
               <div className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-white/10 border border-white/15">
                 <Database className="w-3 h-3 text-emerald-400" />
-                <span>{isSupabaseConfigured ? 'Supabase Database Live' : 'LocalStorage & Supabase Ready'}</span>
+                <span>{isSupabaseConfigured ? 'Supabase Database Connected' : 'LocalStorage Mode'}</span>
               </div>
             </div>
 
@@ -163,11 +171,11 @@ export default function AuthPage({ onOpenUseCaseModal }) {
               </div>
               <div className="flex items-center gap-1.5">
                 <Tv className="w-3.5 h-3.5 text-amber-400" />
-                <span>โหมดจอทีวี & โปรเจคเตอร์</span>
+                <span>จอทีวี & โปรเจคเตอร์</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <FileCheck2 className="w-3.5 h-3.5 text-blue-400" />
-                <span>ส่งออกรายงานราชการ</span>
+                <span>ออกรายงาน PDF/Excel</span>
               </div>
             </div>
           </div>
@@ -211,7 +219,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100/50'
                 }`}
               >
-                สมัครสมาชิกใหม่ (Register)
+                ลงทะเบียนสมาชิก (Register)
               </button>
             </div>
 
@@ -219,8 +227,8 @@ export default function AuthPage({ onOpenUseCaseModal }) {
               
               {/* Error Message Alert */}
               {errorMessage && (
-                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-shake">
-                  <span className="font-bold">⚠️ ข้อผิดพลาด:</span>
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+                  <span className="font-bold flex-shrink-0">⚠️ แจ้งเตือน:</span>
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -230,16 +238,16 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      อีเมลสถานศึกษา (Email)
+                      ชื่อผู้ใช้งาน หรือ อีเมล (Username / Email)
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <Mail className="w-4 h-4" />
                       </div>
                       <input
-                        type="email"
+                        type="text"
                         required
-                        placeholder="yourname@ttc.ac.th หรืออีเมลทั่วไป"
+                        placeholder="กรอกชื่อผู้ใช้ หรือ somchai@ttc.ac.th"
                         value={loginForm.email}
                         onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                         className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white transition-all shadow-xs"
@@ -290,42 +298,67 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                     )}
                   </button>
 
-                  {/* Fast Demo One-Click Access */}
-                  <div className="pt-4 border-t border-slate-200">
-                    <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2.5 text-center">
-                      ⚡ เข้าสู่ระบบแบบทดสอบด่วน (1-Click Demo Logins)
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => fastDemoLogin('user')}
-                        className="p-2.5 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100 text-blue-800 text-xs font-semibold flex flex-col items-center gap-1 transition-all"
-                      >
-                        <User className="w-4 h-4 text-blue-600" />
-                        <span className="text-[11px] font-bold">ครู / แผนก</span>
-                        <span className="text-[9px] text-blue-600 font-normal">General User</span>
-                      </button>
+                  {/* Reference Info for initial accounts */}
+                  <div className="pt-3 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => setShowDefaultAccounts(!showDefaultAccounts)}
+                      className="w-full flex items-center justify-between text-xs text-slate-500 hover:text-slate-800 transition-colors py-1"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Info className="w-3.5 h-3.5 text-slate-400" />
+                        <span>ตัวอย่างบัญชีตั้งต้นสำหรับทดสอบระบบ</span>
+                      </span>
+                      <span className="text-[11px] font-semibold text-brand-600">
+                        {showDefaultAccounts ? 'ซ่อน' : 'แสดง'}
+                      </span>
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => fastDemoLogin('admin')}
-                        className="p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold flex flex-col items-center gap-1 transition-all"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                        <span className="text-[11px] font-bold">เจ้าหน้าที่แผนฯ</span>
-                        <span className="text-[9px] text-emerald-600 font-normal">Admin</span>
-                      </button>
+                    {showDefaultAccounts && (
+                      <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2 animate-fadeIn">
+                        <div className="flex items-center justify-between py-1 border-b border-slate-200/60">
+                          <div>
+                            <span className="font-bold text-slate-800">1. ผู้ใช้ทั่วไป (ครู/แผนก):</span>
+                            <div className="text-[11px] text-slate-500">somkid@ttc.ac.th (รหัสผ่าน: password123)</div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => fillLoginForm('somkid@ttc.ac.th')}
+                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
+                          >
+                            เลือก
+                          </button>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={() => fastDemoLogin('executive')}
-                        className="p-2.5 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex flex-col items-center gap-1 transition-all"
-                      >
-                        <Award className="w-4 h-4 text-amber-600" />
-                        <span className="text-[11px] font-bold">ผู้บริหาร</span>
-                        <span className="text-[9px] text-amber-600 font-normal">Executive</span>
-                      </button>
-                    </div>
+                        <div className="flex items-center justify-between py-1 border-b border-slate-200/60">
+                          <div>
+                            <span className="font-bold text-slate-800">2. ฝ่ายแผนงาน (Admin):</span>
+                            <div className="text-[11px] text-slate-500">admin.plan@ttc.ac.th (รหัสผ่าน: password123)</div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => fillLoginForm('admin.plan@ttc.ac.th')}
+                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
+                          >
+                            เลือก
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between py-1">
+                          <div>
+                            <span className="font-bold text-slate-800">3. ผู้บริหาร (Executive):</span>
+                            <div className="text-[11px] text-slate-500">director@ttc.ac.th (รหัสผ่าน: password123)</div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => fillLoginForm('director@ttc.ac.th')}
+                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
+                          >
+                            เลือก
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </form>
               )}
@@ -344,7 +377,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                       <input
                         type="text"
                         required
-                        placeholder="เช่น นายสมชาย ไฟฟ้า"
+                        placeholder="เช่น นายสมชาย สายใจดี"
                         value={registerForm.fullName}
                         onChange={(e) => setRegisterForm({ ...registerForm, fullName: e.target.value })}
                         className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white"
@@ -461,7 +494,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                       <span className="inline-block animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                     ) : (
                       <>
-                        <span>ลงทะเบียนและบันทึกขึ้น Supabase</span>
+                        <span>ลงทะเบียนสมาชิกใหม่</span>
                         <ArrowRight className="w-4 h-4" />
                       </>
                     )}

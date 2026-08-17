@@ -32,8 +32,6 @@ export default function Navbar({
 }) {
   const { 
     currentUser, 
-    switchRole, 
-    setDepartment,
     logout,
     tvMode, 
     toggleTvMode, 
@@ -207,7 +205,7 @@ export default function Navbar({
               <span className="hidden xl:inline">ผัง Use Case สิทธิ์</span>
             </button>
 
-            {/* Role Switcher Menu */}
+            {/* User Profile Menu */}
             <div className="relative">
               <button
                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
@@ -225,7 +223,7 @@ export default function Navbar({
                 <div className="text-left leading-tight hidden xl:block">
                   <div className="text-xs font-bold text-slate-800">{currentUser.name}</div>
                   <div className="text-[10px] text-slate-500">
-                    {currentUser.role === 'admin' ? 'เจ้าหน้าที่แผนฯ (Admin)' :
+                    {currentUser.role === 'admin' ? 'ฝ่ายแผนงาน (Admin)' :
                      currentUser.role === 'executive' ? 'ผู้บริหาร (Executive)' :
                      'ผู้ใช้งานทั่วไป (User)'}
                   </div>
@@ -239,77 +237,34 @@ export default function Navbar({
                   className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-fadeIn"
                   onMouseLeave={() => setRoleDropdownOpen(false)}
                 >
-                  <div className="px-4 py-2 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-800">สลับสิทธิ์การใช้งาน (Role Switcher)</p>
-                    <p className="text-[11px] text-slate-500">ทดสอบฟังก์ชันตาม Use Case ได้ทันที</p>
-                  </div>
-
-                  <div className="p-2 space-y-1">
-                    <button
-                      onClick={() => {
-                        switchRole('user');
-                        setRoleDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium text-left transition-colors ${
-                        currentUser.role === 'user' ? 'bg-blue-50 text-blue-800 font-bold' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <User className="w-4 h-4 text-blue-600" />
-                      <div>
-                        <div>1. ผู้ใช้งานทั่วไป (User)</div>
-                        <div className="text-[10px] font-normal text-slate-500">ครู / แผนก / บุคลากร (อัปโหลด & ตรวจสอบ)</div>
+                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        currentUser.role === 'admin' ? 'bg-emerald-100 text-emerald-800' :
+                        currentUser.role === 'executive' ? 'bg-amber-100 text-amber-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {currentUser.role === 'admin' ? 'สิทธิ์: เจ้าหน้าที่ฝ่ายแผนฯ (Admin)' :
+                         currentUser.role === 'executive' ? 'สิทธิ์: ผู้บริหารสถานศึกษา (Executive)' :
+                         'สิทธิ์: ผู้ใช้งานทั่วไป (User)'}
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-slate-800">{currentUser.name}</p>
+                    <p className="text-[11px] text-slate-500">{currentUser.email}</p>
+                    <div className="mt-1 text-[11px] text-slate-600 font-medium">
+                      <span>สังกัด: </span>
+                      <span className="text-slate-800 font-semibold">{currentUser.departmentName || 'วิทยาลัยเทคนิคท่าหลวงฯ'}</span>
+                    </div>
+                    {currentUser.position && (
+                      <div className="text-[10px] text-slate-500">
+                        <span>ตำแหน่ง: </span>
+                        <span>{currentUser.position}</span>
                       </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        switchRole('admin');
-                        setRoleDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium text-left transition-colors ${
-                        currentUser.role === 'admin' ? 'bg-emerald-50 text-emerald-800 font-bold' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div>2. เจ้าหน้าที่ฝ่ายแผนฯ (Admin)</div>
-                        <div className="text-[10px] font-normal text-slate-500">อนุมัติ / ตีกลับ / คัดกรองผู้ยังไม่ส่ง / จัดการ KPI</div>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        switchRole('executive');
-                        setRoleDropdownOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg text-xs font-medium text-left transition-colors ${
-                        currentUser.role === 'executive' ? 'bg-amber-50 text-amber-800 font-bold' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <Award className="w-4 h-4 text-amber-600" />
-                      <div>
-                        <div>3. ผู้บริหาร (Executive)</div>
-                        <div className="text-[10px] font-normal text-slate-500">แดชบอร์ด % สำเร็จ / ผลงาน / Export PDF/Excel</div>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Department Switcher */}
-                  <div className="pt-2 px-3 border-t border-slate-100">
-                    <label className="text-[11px] font-bold text-slate-700 block mb-1">สังกัดแผนก / งาน:</label>
-                    <select
-                      value={currentUser.departmentId}
-                      onChange={(e) => setDepartment(e.target.value)}
-                      className="w-full text-xs p-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                    >
-                      {DEPARTMENTS.map(d => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
-                      ))}
-                    </select>
+                    )}
                   </div>
 
                   {/* Account Actions */}
-                  <div className="p-2 border-t border-slate-100 space-y-1">
+                  <div className="p-2 space-y-1">
                     {onOpenChangePassword && (
                       <button
                         onClick={() => {
@@ -396,36 +351,18 @@ export default function Navbar({
           )}
 
           <div className="pt-3 border-t border-slate-100">
-            <div className="text-xs font-bold text-slate-500 mb-2">สิทธิ์การใช้งานปัจจุบัน:</div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => switchRole('user')}
-                className={`p-2 rounded-lg text-xs font-medium text-center border ${
-                  currentUser.role === 'user' ? 'bg-blue-600 text-white border-blue-600' : 'bg-slate-50 text-slate-700'
-                }`}
-              >
-                ผู้ใช้
-              </button>
-              <button
-                onClick={() => switchRole('admin')}
-                className={`p-2 rounded-lg text-xs font-medium text-center border ${
-                  currentUser.role === 'admin' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 text-slate-700'
-                }`}
-              >
-                แผนงาน/Admin
-              </button>
-              <button
-                onClick={() => switchRole('executive')}
-                className={`p-2 rounded-lg text-xs font-medium text-center border ${
-                  currentUser.role === 'executive' ? 'bg-amber-600 text-white border-amber-600' : 'bg-slate-50 text-slate-700'
-                }`}
-              >
-                ผู้บริหาร
-              </button>
+            <div className="bg-slate-50 rounded-xl p-3 mb-2">
+              <div className="text-xs font-bold text-slate-800">{currentUser.name}</div>
+              <div className="text-[11px] text-slate-500">{currentUser.email}</div>
+              <div className="text-[11px] text-brand-700 mt-0.5 font-semibold">
+                {currentUser.role === 'admin' ? 'เจ้าหน้าที่ฝ่ายแผนฯ (Admin)' :
+                 currentUser.role === 'executive' ? 'ผู้บริหารสถานศึกษา (Executive)' :
+                 'ผู้ใช้งานทั่วไป (User)'} • {currentUser.departmentName}
+              </div>
             </div>
 
             {/* Mobile Account Actions */}
-            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2">
               {onOpenChangePassword && (
                 <button
                   onClick={() => {
