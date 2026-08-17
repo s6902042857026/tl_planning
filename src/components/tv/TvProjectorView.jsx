@@ -63,13 +63,18 @@ export default function TvProjectorView({ submissions, onClose }) {
       {/* Top TV Presentation Header */}
       <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-slate-900 text-white px-8 py-4 flex items-center justify-between shadow-lg flex-shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center p-1.5 shadow-md">
-            <img src="/favicon.svg" alt="TTC Planning" className="w-full h-full" />
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center p-1 shadow-md overflow-hidden">
+            <img 
+              src="/logotl.png" 
+              alt="วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์" 
+              onError={(e) => { e.target.onerror = null; e.target.src = '/favicon.svg'; }}
+              className="w-full h-full object-contain" 
+            />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="live-dot"></span>
-              <span className="text-xs tracking-wider uppercase text-amber-400 font-bold">LIVE BROADCAST • สอศ.</span>
+              <span className="text-xs tracking-wider uppercase text-amber-400 font-bold">LIVE BROADCAST • วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
               ศูนย์ติดตามตัวชี้วัด ฝ่ายยุทธศาสตร์และแผนงาน ประจำปีงบประมาณ {activeFiscalYear}

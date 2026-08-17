@@ -5,6 +5,7 @@ import {
   Lightbulb, 
   Server, 
   Users, 
+  Store,
   ArrowUpRight, 
   FileText, 
   CheckCircle2, 
@@ -21,6 +22,7 @@ export default function DomainsOverview({ submissions, onSelectDomain, onSelectK
       case 'Lightbulb': return Lightbulb;
       case 'Server': return Server;
       case 'Users': return Users;
+      case 'Store': return Store;
       default: return FileText;
     }
   };
@@ -31,7 +33,7 @@ export default function DomainsOverview({ submissions, onSelectDomain, onSelectK
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-soft">
         <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
           <Compass className="w-6 h-6 text-brand-600" />
-          โครงสร้างตัวชี้วัด 5 ด้านหลัก ฝ่ายยุทธศาสตร์และแผนงาน
+          โครงสร้างตัวชี้วัด 6 ด้านหลัก ฝ่ายยุทธศาสตร์และแผนงาน
         </h2>
         <p className="text-xs text-slate-500 mt-0.5">
           มาตรฐานตัวชี้วัดตามกรอบการดำเนินงานสำนักงานคณะกรรมการการอาชีวศึกษา (สอศ.)

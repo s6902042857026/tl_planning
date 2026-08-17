@@ -17,6 +17,7 @@ import {
   Lightbulb,
   Server,
   Users,
+  Store,
   Sparkles
 } from 'lucide-react';
 import { 
@@ -102,6 +103,7 @@ export default function ExecutiveDashboard({
       case 'Lightbulb': return Lightbulb;
       case 'Server': return Server;
       case 'Users': return Users;
+      case 'Store': return Store;
       default: return SlidersHorizontal;
     }
   };
@@ -124,7 +126,7 @@ export default function ExecutiveDashboard({
               ระบบติดตามตัวชี้วัด ฝ่ายยุทธศาสตร์และแผนงาน
             </h2>
             <p className="text-slate-300 text-sm mt-1 max-w-2xl font-light">
-              ศูนย์รวมการกำกับ ติดตาม และประเมินผลสัมฤทธิ์ตามเกณฑ์มาตรฐาน สอศ. ครอบคลุม 5 หมวดงานยุทธศาสตร์
+              ศูนย์รวมการกำกับ ติดตาม และประเมินผลสัมฤทธิ์ตามเกณฑ์มาตรฐาน สอศ. ครอบคลุม 6 หมวดงานยุทธศาสตร์
             </p>
           </div>
 
@@ -216,7 +218,7 @@ export default function ExecutiveDashboard({
           <div>
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-brand-600"></span>
-              ความก้าวหน้า 5 หมวดงานยุทธศาสตร์และแผนงาน
+              ความก้าวหน้า 6 หมวดงานยุทธศาสตร์และแผนงาน
             </h3>
             <p className="text-xs text-slate-500">คลิกที่การ์ดเพื่อดูรายละเอียดตัวชี้วัดย่อย เอกสาร และส่งผลงาน</p>
           </div>

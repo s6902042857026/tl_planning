@@ -39,7 +39,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
     if (currentUser.role === 'user') {
       return [
         { id: 'my_submissions', label: 'สถานะการส่งงานของฉัน', icon: FileText },
-        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal }
+        { id: 'domains', label: 'ตัวชี้วัด 6 ด้าน', icon: SlidersHorizontal }
       ];
     }
 
@@ -47,7 +47,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
       return [
         { id: 'review_table', label: 'ตรวจสอบและอนุมัติเอกสาร', icon: CheckCircle2 },
         { id: 'missing_tracker', label: 'ติดตามผู้ยังไม่ส่งงาน', icon: Bell },
-        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal },
+        { id: 'domains', label: 'ตัวชี้วัด 6 ด้าน', icon: SlidersHorizontal },
         { id: 'kpi_manager', label: 'จัดการหมวดหมู่ตัวชี้วัด', icon: SlidersHorizontal }
       ];
     }
@@ -55,14 +55,14 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
     if (currentUser.role === 'executive') {
       return [
         { id: 'dashboard', label: 'แดชบอร์ดภาพรวม', icon: BarChart3 },
-        { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal },
+        { id: 'domains', label: 'ตัวชี้วัด 6 ด้าน', icon: SlidersHorizontal },
         { id: 'executive_pdca', label: 'สรุปผลสัมฤทธิ์ PDCA & งบประมาณ', icon: BarChart3 },
         { id: 'awards_mou', label: 'ผลงาน รางวัล & MOU', icon: Award }
       ];
     }
 
     return [
-      { id: 'domains', label: 'ตัวชี้วัด 5 ด้าน', icon: SlidersHorizontal }
+      { id: 'domains', label: 'ตัวชี้วัด 6 ด้าน', icon: SlidersHorizontal }
     ];
   };
 
