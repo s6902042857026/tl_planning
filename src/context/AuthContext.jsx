@@ -6,80 +6,64 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Clear legacy mock session cache so browser starts fresh on Login page
+  // Clear any legacy localStorage tokens from past sessions
   try {
     localStorage.removeItem('ttc_auth_user');
+    localStorage.removeItem('ttc_logged_in_user_v1');
   } catch (e) {}
 
-  // Local storage session key for actual logged in user (null by default -> displays Login page)
+  // Session state: only logged in if sessionStorage has an active user session in this browser tab
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('ttc_logged_in_user_v1');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse auth user', e);
+    try {
+      const activeUser = sessionStorage.getItem('ttc_session_user');
+      if (activeUser) {
+        return JSON.parse(activeUser);
       }
+    } catch (e) {
+      console.error('Failed to parse session user', e);
     }
-    return null; // Must login first!
+    return null; // Always require login on fresh entry!
   });
 
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [tvMode, setTvMode] = useState(false);
   const [activeFiscalYear, setActiveFiscalYear] = useState('2568');
   const [notification, setNotification] = useState(null);
 
-  // Synchronize with Supabase Auth session if configured
+  // Synchronize session only when user has actively logged in
   useEffect(() => {
     let mounted = true;
 
-    async function initAuth() {
+    async function checkExistingAuth() {
       if (isSupabaseConfigured && supabase) {
-        try {
-          const { data: { session: initialSession } } = await supabase.auth.getSession();
-          if (mounted && initialSession) {
-            setSession(initialSession);
-            await fetchUserProfile(initialSession.user);
-          }
-        } catch (err) {
-          console.warn('Supabase getSession error:', err);
-        }
-
         // Listen to Auth State Changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
           if (!mounted) return;
           setSession(currentSession);
-          if (currentSession?.user) {
-            await fetchUserProfile(currentSession.user);
-          } else if (event === 'SIGNED_OUT') {
+          if (event === 'SIGNED_OUT') {
             setCurrentUser(null);
-            localStorage.removeItem('ttc_logged_in_user_v1');
-            localStorage.removeItem('ttc_auth_user');
+            sessionStorage.removeItem('ttc_session_user');
           }
         });
 
-        if (mounted) setLoading(false);
         return () => subscription.unsubscribe();
-      } else {
-        if (mounted) setLoading(false);
       }
     }
 
-    initAuth();
+    checkExistingAuth();
 
     return () => {
       mounted = false;
     };
   }, []);
 
-  // Save current user in localStorage whenever updated
+  // Save current user in sessionStorage whenever updated
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('ttc_logged_in_user_v1', JSON.stringify(currentUser));
+      sessionStorage.setItem('ttc_session_user', JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem('ttc_logged_in_user_v1');
-      localStorage.removeItem('ttc_auth_user');
+      sessionStorage.removeItem('ttc_session_user');
     }
   }, [currentUser]);
 
@@ -315,8 +299,11 @@ export function AuthProvider({ children }) {
     }
     setSession(null);
     setCurrentUser(null);
-    localStorage.removeItem('ttc_logged_in_user_v1');
-    localStorage.removeItem('ttc_auth_user');
+    sessionStorage.removeItem('ttc_session_user');
+    try {
+      localStorage.removeItem('ttc_logged_in_user_v1');
+      localStorage.removeItem('ttc_auth_user');
+    } catch (e) {}
     showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
   };
 
