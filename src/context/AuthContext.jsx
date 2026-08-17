@@ -6,9 +6,14 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  // Local storage cache for persistence (null by default -> must login first)
+  // Clear legacy mock session cache so browser starts fresh on Login page
+  try {
+    localStorage.removeItem('ttc_auth_user');
+  } catch (e) {}
+
+  // Local storage session key for actual logged in user (null by default -> displays Login page)
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('ttc_auth_user');
+    const saved = localStorage.getItem('ttc_logged_in_user_v1');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -16,7 +21,7 @@ export function AuthProvider({ children }) {
         console.error('Failed to parse auth user', e);
       }
     }
-    return null; // Require login first
+    return null; // Must login first!
   });
 
   const [session, setSession] = useState(null);
@@ -48,9 +53,9 @@ export function AuthProvider({ children }) {
           if (currentSession?.user) {
             await fetchUserProfile(currentSession.user);
           } else if (event === 'SIGNED_OUT') {
-            // Check if local demo user is active or clear
-            const saved = localStorage.getItem('ttc_auth_user');
-            if (!saved) setCurrentUser(null);
+            setCurrentUser(null);
+            localStorage.removeItem('ttc_logged_in_user_v1');
+            localStorage.removeItem('ttc_auth_user');
           }
         });
 
@@ -71,8 +76,9 @@ export function AuthProvider({ children }) {
   // Save current user in localStorage whenever updated
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('ttc_auth_user', JSON.stringify(currentUser));
+      localStorage.setItem('ttc_logged_in_user_v1', JSON.stringify(currentUser));
     } else {
+      localStorage.removeItem('ttc_logged_in_user_v1');
       localStorage.removeItem('ttc_auth_user');
     }
   }, [currentUser]);
@@ -309,6 +315,7 @@ export function AuthProvider({ children }) {
     }
     setSession(null);
     setCurrentUser(null);
+    localStorage.removeItem('ttc_logged_in_user_v1');
     localStorage.removeItem('ttc_auth_user');
     showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
   };
