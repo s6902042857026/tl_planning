@@ -3,6 +3,8 @@ import { useAuth } from './context/AuthContext';
 import { kpiService } from './services/kpiService';
 import Navbar from './components/common/Navbar';
 import Toast from './components/common/Toast';
+import AuthPage from './components/auth/AuthPage';
+import ChangePasswordModal from './components/auth/ChangePasswordModal';
 import ExecutiveDashboard from './components/dashboard/ExecutiveDashboard';
 import DomainsOverview from './components/dashboard/DomainsOverview';
 import DomainDetailModal from './components/dashboard/DomainDetailModal';
@@ -21,7 +23,7 @@ import { isSupabaseConfigured } from './lib/supabase';
 import { Sparkles, RefreshCw, ExternalLink } from 'lucide-react';
 
 export default function App() {
-  const { currentUser, tvMode, setTvMode, showToast } = useAuth();
+  const { currentUser, isAuthenticated, loading: authLoading, tvMode, setTvMode, showToast } = useAuth();
   
   // Default landing tab based on role
   const getDefaultTab = (role) => {
@@ -30,21 +32,22 @@ export default function App() {
     return 'my_submissions';
   };
 
-  const [activeTab, setActiveTab] = useState(() => getDefaultTab(currentUser.role));
+  const [activeTab, setActiveTab] = useState(() => currentUser ? getDefaultTab(currentUser.role) : 'my_submissions');
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Automatically adjust active tab whenever role changes or if unauthorized role tries to view executive dashboard
   useEffect(() => {
-    if (currentUser.role !== 'executive' && (activeTab === 'dashboard' || activeTab === 'executive_pdca' || activeTab === 'awards_mou')) {
+    if (currentUser && currentUser.role !== 'executive' && (activeTab === 'dashboard' || activeTab === 'executive_pdca' || activeTab === 'awards_mou')) {
       setActiveTab(getDefaultTab(currentUser.role));
     }
-  }, [currentUser.role]);
+  }, [currentUser?.role]);
 
   // Modal States
   const [useCaseModalOpen, setUseCaseModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [selectedDomainForDetail, setSelectedDomainForDetail] = useState(null);
   const [selectedSubmissionForDetail, setSelectedSubmissionForDetail] = useState(null);
   const [selectedKpiForUpload, setSelectedKpiForUpload] = useState(null);
@@ -64,8 +67,10 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchSubmissions();
-  }, []);
+    if (currentUser) {
+      fetchSubmissions();
+    }
+  }, [currentUser]);
 
   // Handlers
   const handleCreateSubmission = async (formData) => {
@@ -100,6 +105,20 @@ export default function App() {
     setUploadModalOpen(true);
   };
 
+  // If user is not logged in, show AuthPage (Login / Register)
+  if (!currentUser) {
+    return (
+      <>
+        <Toast />
+        <AuthPage onOpenUseCaseModal={() => setUseCaseModalOpen(true)} />
+        <UseCaseDiagramModal
+          isOpen={useCaseModalOpen}
+          onClose={() => setUseCaseModalOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-kanit">
       <Toast />
@@ -122,6 +141,7 @@ export default function App() {
           setSelectedDomainForUpload(null);
           setUploadModalOpen(true);
         }}
+        onOpenChangePassword={() => setChangePasswordModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -202,22 +222,19 @@ export default function App() {
             />
             <div>
               <span className="font-bold text-slate-800">ฝ่ายยุทธศาสตร์และแผนงาน วิทยาลัยเทคนิคท่าหลวงซิเมนต์ไทยอนุสรณ์</span>
-              <p className="text-[11px] text-slate-400">ระบบติดตามและประเมินผลตัวชี้วัด 5 ด้านหลัก (TTC Planning KPI System)</p>
+              <p className="text-[11px] text-slate-400">ระบบติดตามและประเมินผลตัวชี้วัด 6 ด้านหลัก (TTC Planning KPI System)</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setUseCaseModalOpen(true)}
-              className="hover:text-brand-600 font-medium"
-            >
-              แผนผังสิทธิ์ (Use Case)
-            </button>
-            <span>•</span>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="text-slate-400">พัฒนาสำหรับสำนักงานคณะกรรมการการอาชีวศึกษา (สอศ.)</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
+              <span className={`w-2 h-2 rounded-full ${isSupabaseConfigured ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+              <span>{isSupabaseConfigured ? 'Supabase Database Connected' : 'LocalStorage & Supabase Ready'}</span>
+            </div>
             <button
               onClick={handleResetData}
-              className="flex items-center gap-1 hover:text-amber-600 text-[11px]"
-              title="รีเซ็ตข้อมูลตัวอย่าง"
+              className="flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors"
             >
               <RefreshCw className="w-3 h-3" />
               <span>รีเซ็ตข้อมูลตัวอย่าง</span>
@@ -226,45 +243,67 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Modals Container */}
-      <UseCaseDiagramModal
-        isOpen={useCaseModalOpen}
-        onClose={() => setUseCaseModalOpen(false)}
-      />
+      {/* Modals */}
+      {selectedDomainForDetail && (
+        <DomainDetailModal
+          domain={selectedDomainForDetail}
+          submissions={submissions}
+          isOpen={Boolean(selectedDomainForDetail)}
+          onClose={() => setSelectedDomainForDetail(null)}
+          onSelectKpiForUpload={(kpi) => {
+            setSelectedKpiForUpload(kpi);
+            setSelectedDomainForUpload(selectedDomainForDetail);
+            setSelectedDomainForDetail(null);
+            setUploadModalOpen(true);
+          }}
+          onOpenDetailModal={(s) => setSelectedSubmissionForDetail(s)}
+        />
+      )}
 
-      <SubmissionUploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        onSubmitSuccess={handleCreateSubmission}
-        initialKpi={selectedKpiForUpload}
-        initialDomain={selectedDomainForUpload}
-      />
+      {uploadModalOpen && (
+        <SubmissionUploadModal
+          isOpen={uploadModalOpen}
+          onClose={() => {
+            setUploadModalOpen(false);
+            setSelectedKpiForUpload(null);
+            setSelectedDomainForUpload(null);
+          }}
+          onSubmit={handleCreateSubmission}
+          initialKpi={selectedKpiForUpload}
+          initialDomain={selectedDomainForUpload}
+        />
+      )}
 
-      <DomainDetailModal
-        domain={selectedDomainForDetail}
-        isOpen={Boolean(selectedDomainForDetail)}
-        onClose={() => setSelectedDomainForDetail(null)}
-        onSelectKpiToUpload={handleSelectKpiToUpload}
-        submissions={submissions}
-        onOpenSubmissionDetail={(s) => setSelectedSubmissionForDetail(s)}
-      />
+      {selectedSubmissionForDetail && (
+        <SubmissionDetailModal
+          submission={selectedSubmissionForDetail}
+          isOpen={Boolean(selectedSubmissionForDetail)}
+          onClose={() => setSelectedSubmissionForDetail(null)}
+          onReviewSubmission={handleReviewSubmission}
+        />
+      )}
 
-      <SubmissionDetailModal
-        submission={selectedSubmissionForDetail}
-        isOpen={Boolean(selectedSubmissionForDetail)}
-        onClose={() => setSelectedSubmissionForDetail(null)}
-        isAdmin={currentUser.role === 'admin'}
-        onReviewClick={(s) => {
-          setSelectedSubmissionForDetail(null);
-          setActiveTab('review_table');
-        }}
-      />
+      {exportModalOpen && (
+        <ExportReportModal
+          isOpen={exportModalOpen}
+          onClose={() => setExportModalOpen(false)}
+          submissions={submissions}
+        />
+      )}
 
-      <ExportReportModal
-        isOpen={exportModalOpen}
-        onClose={() => setExportModalOpen(false)}
-        submissions={submissions}
-      />
+      {useCaseModalOpen && (
+        <UseCaseDiagramModal
+          isOpen={useCaseModalOpen}
+          onClose={() => setUseCaseModalOpen(false)}
+        />
+      )}
+
+      {changePasswordModalOpen && (
+        <ChangePasswordModal
+          isOpen={changePasswordModalOpen}
+          onClose={() => setChangePasswordModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

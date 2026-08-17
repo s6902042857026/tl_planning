@@ -138,11 +138,46 @@ CREATE POLICY "Public Read Access for Categories" ON kpi_categories FOR SELECT U
 CREATE POLICY "Public Read Access for Departments" ON departments FOR SELECT USING (true);
 CREATE POLICY "Public Read Access for Submissions" ON submissions FOR SELECT USING (true);
 CREATE POLICY "Public Read Access for Files" ON submission_files FOR SELECT USING (true);
+CREATE POLICY "Public Read Access for User Profiles" ON user_profiles FOR SELECT USING (true);
 
--- Allow Insert/Update for Submissions
+-- Allow Insert/Update for Submissions and User Profiles
 CREATE POLICY "Allow Insert Submissions" ON submissions FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow Update Submissions" ON submissions FOR UPDATE USING (true);
 CREATE POLICY "Allow Insert Files" ON submission_files FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow Insert User Profiles" ON user_profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow Update User Profiles" ON user_profiles FOR UPDATE USING (true);
+
+-- ==============================================================================
+-- SUPABASE AUTH AUTO-PROFILE TRIGGER
+-- ==============================================================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, email, full_name, role, department_id, position)
+  VALUES (
+    new.id,
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
+    COALESCE((new.raw_user_meta_data->>'role')::user_role, 'user'::user_role),
+    COALESCE(new.raw_user_meta_data->>'department_id', 'dept_elec'),
+    COALESCE(new.raw_user_meta_data->>'position', 'ครูผู้สอน / เจ้าหน้าที่')
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = EXCLUDED.full_name,
+    role = EXCLUDED.role,
+    department_id = EXCLUDED.department_id,
+    position = EXCLUDED.position,
+    updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ==============================================================================
 -- INITIAL SEED DATA

@@ -15,17 +15,26 @@ import {
   FileText,
   BarChart3,
   SlidersHorizontal,
-  Bell
+  Bell,
+  KeyRound,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FISCAL_YEARS, DEPARTMENTS } from '../../data/kpiStructure';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, onOpenUploadModal }) {
+export default function Navbar({ 
+  activeTab, 
+  setActiveTab, 
+  onOpenUseCaseModal, 
+  onOpenUploadModal,
+  onOpenChangePassword
+}) {
   const { 
     currentUser, 
     switchRole, 
     setDepartment,
+    logout,
     tvMode, 
     toggleTvMode, 
     activeFiscalYear, 
@@ -298,6 +307,33 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
                       ))}
                     </select>
                   </div>
+
+                  {/* Account Actions */}
+                  <div className="p-2 border-t border-slate-100 space-y-1">
+                    {onOpenChangePassword && (
+                      <button
+                        onClick={() => {
+                          setRoleDropdownOpen(false);
+                          onOpenChangePassword();
+                        }}
+                        className="w-full flex items-center gap-2.5 p-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left transition-colors"
+                      >
+                        <KeyRound className="w-4 h-4 text-brand-600" />
+                        <span>เปลี่ยนรหัสผ่าน (Change Password)</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setRoleDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2.5 p-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 text-left transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 text-rose-600" />
+                      <span>ออกจากระบบ (Sign Out)</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -385,6 +421,33 @@ export default function Navbar({ activeTab, setActiveTab, onOpenUseCaseModal, on
                 }`}
               >
                 ผู้บริหาร
+              </button>
+            </div>
+
+            {/* Mobile Account Actions */}
+            <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+              {onOpenChangePassword && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenChangePassword();
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-brand-600" />
+                  <span>เปลี่ยนรหัสผ่าน</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-rose-200 text-xs font-semibold text-rose-600 bg-rose-50"
+              >
+                <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                <span>ออกจากระบบ</span>
               </button>
             </div>
           </div>
