@@ -180,17 +180,6 @@ export default function AuthPage({ onOpenUseCaseModal }) {
             </div>
           </div>
 
-          {/* Use case diagram info button */}
-          {onOpenUseCaseModal && (
-            <button
-              onClick={onOpenUseCaseModal}
-              className="inline-flex items-center gap-2 text-xs text-brand-700 hover:text-brand-900 font-semibold transition-colors"
-            >
-              <Layers className="w-4 h-4 text-brand-600" />
-              <span>ดูแผนผังสิทธิ์การใช้งานและ Use Case Diagram</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
 
         {/* Right Side: Login / Register Form Card */}

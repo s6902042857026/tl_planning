@@ -198,15 +198,17 @@ export default function Navbar({
               <span>โหมดจอทีวี / Projector</span>
             </button>
 
-            {/* Use Case Modal Trigger */}
-            <button
-              onClick={onOpenUseCaseModal}
-              title="เปิดดูแผนผังสิทธิ์การใช้งาน (Use Case Diagram)"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition-all"
-            >
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span className="hidden xl:inline">ผัง Use Case สิทธิ์</span>
-            </button>
+            {/* Use Case Modal Trigger (Admin Only) */}
+            {currentUser?.role === 'admin' && (
+              <button
+                onClick={onOpenUseCaseModal}
+                title="เปิดดูแผนผังสิทธิ์การใช้งาน (Use Case Diagram) สำหรับผู้ดูแลระบบ"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition-all"
+              >
+                <Layers className="w-4 h-4 text-indigo-600" />
+                <span className="hidden xl:inline">ผัง Use Case สิทธิ์</span>
+              </button>
+            )}
 
             {/* User Profile Menu */}
             <div className="relative">

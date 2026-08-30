@@ -36,12 +36,21 @@ export default function App() {
   const [submissions, setSubmissions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Automatically adjust active tab whenever role changes or if unauthorized role tries to view executive dashboard
+  // Automatically adjust active tab whenever role changes or if unauthorized role tries to view restricted tabs
   useEffect(() => {
-    if (currentUser && currentUser.role !== 'executive' && (activeTab === 'dashboard' || activeTab === 'executive_pdca' || activeTab === 'awards_mou')) {
-      setActiveTab(getDefaultTab(currentUser.role));
+    if (currentUser) {
+      const allowedTabsByRole = {
+        user: ['my_submissions', 'domains'],
+        admin: ['review_table', 'missing_tracker', 'domains', 'kpi_manager'],
+        executive: ['dashboard', 'domains', 'executive_pdca', 'awards_mou']
+      };
+
+      const allowed = allowedTabsByRole[currentUser.role] || ['my_submissions', 'domains'];
+      if (!allowed.includes(activeTab)) {
+        setActiveTab(getDefaultTab(currentUser.role));
+      }
     }
-  }, [currentUser?.role]);
+  }, [currentUser?.role, activeTab]);
 
   // Modal States
   const [useCaseModalOpen, setUseCaseModalOpen] = useState(false);
@@ -105,16 +114,12 @@ export default function App() {
     setUploadModalOpen(true);
   };
 
-  // If user is not logged in, show AuthPage (Login / Register)
+  // If user is not logged in, show AuthPage (Login / Register) without use-case modal
   if (!currentUser) {
     return (
       <>
         <Toast />
-        <AuthPage onOpenUseCaseModal={() => setUseCaseModalOpen(true)} />
-        <UseCaseDiagramModal
-          isOpen={useCaseModalOpen}
-          onClose={() => setUseCaseModalOpen(false)}
-        />
+        <AuthPage />
       </>
     );
   }
@@ -291,7 +296,7 @@ export default function App() {
         />
       )}
 
-      {useCaseModalOpen && (
+      {currentUser?.role === 'admin' && useCaseModalOpen && (
         <UseCaseDiagramModal
           isOpen={useCaseModalOpen}
           onClose={() => setUseCaseModalOpen(false)}
