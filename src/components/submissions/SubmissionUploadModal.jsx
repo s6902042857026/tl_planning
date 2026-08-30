@@ -15,7 +15,7 @@ export default function SubmissionUploadModal({
 
   const [selectedDomainId, setSelectedDomainId] = useState(initialDomain?.id || KPI_DOMAINS[0].id);
   const [selectedKpiId, setSelectedKpiId] = useState(initialKpi?.id || '');
-  const [departmentId, setDepartmentId] = useState(currentUser.departmentId || 'dept_elec');
+  const [departmentId, setDepartmentId] = useState(currentUser?.departmentId || 'dept_elec');
   const [projectName, setProjectName] = useState('');
   const [fiscalYear, setFiscalYear] = useState('2568');
   const [academicYear, setAcademicYear] = useState('2567');

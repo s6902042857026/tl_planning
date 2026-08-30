@@ -140,7 +140,7 @@ export default function ExecutiveDashboard({
               <span>ส่งออกรายงาน (Export PDF/Excel)</span>
             </button>
 
-            {currentUser.role === 'user' && (
+            {currentUser?.role === 'user' && (
               <button
                 onClick={onOpenUploadModal}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-sm font-bold shadow-md transition-all hover:scale-105"

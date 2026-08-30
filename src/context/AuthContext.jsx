@@ -127,10 +127,21 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password }) => {
     const inputIdentifier = email.trim().toLowerCase();
     
-    // Convert common usernames to mock email if no domain provided
+    // Check if input matches any initial user by email or prefix
+    const matchedInitial = INITIAL_USERS.find(u => 
+      u.email.toLowerCase() === inputIdentifier || 
+      u.email.toLowerCase().split('@')[0] === inputIdentifier ||
+      (u.name && u.name.toLowerCase().includes(inputIdentifier))
+    );
+
+    // Convert common usernames to email if no domain provided
     let normalizedEmail = inputIdentifier;
-    if (!inputIdentifier.includes('@')) {
-      if (inputIdentifier === 'admin' || inputIdentifier === 'admin.plan') {
+    if (matchedInitial) {
+      normalizedEmail = matchedInitial.email;
+    } else if (!inputIdentifier.includes('@')) {
+      if (inputIdentifier === 'kanok') {
+        normalizedEmail = 'kanok@tl.ac.th';
+      } else if (inputIdentifier === 'admin' || inputIdentifier === 'admin.plan') {
         normalizedEmail = 'admin.plan@ttc.ac.th';
       } else if (inputIdentifier === 'director' || inputIdentifier === 'executive') {
         normalizedEmail = 'director@ttc.ac.th';
@@ -143,20 +154,24 @@ export function AuthProvider({ children }) {
 
     // 1. If Supabase is configured, use Supabase Auth
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password
-      });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password
+        });
 
-      if (!error && data?.user) {
-        setSession(data.session);
-        await fetchUserProfile(data.user);
-        showToast(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${data.user.email}`, 'success');
-        return data.user;
+        if (!error && data?.user) {
+          setSession(data.session);
+          await fetchUserProfile(data.user);
+          showToast(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${data.user.email}`, 'success');
+          return data.user;
+        }
+
+        // If Supabase authentication fails, log and proceed to local fallback
+        console.warn('Supabase auth attempt message:', error?.message);
+      } catch (authErr) {
+        console.warn('Supabase auth error:', authErr);
       }
-
-      // If Supabase authentication fails, check local accounts fallback
-      console.warn('Supabase auth attempt message:', error?.message);
     }
 
     // 2. Local Fallback Mode (Check mock users & registered users)
@@ -165,6 +180,7 @@ export function AuthProvider({ children }) {
     const found = allUsers.find(u => 
       u.email.toLowerCase() === normalizedEmail || 
       u.email.toLowerCase() === inputIdentifier ||
+      u.email.toLowerCase().split('@')[0] === inputIdentifier ||
       (u.name && u.name.toLowerCase().includes(inputIdentifier))
     );
 

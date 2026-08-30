@@ -332,16 +332,25 @@ export default function AuthPage({ onOpenUseCaseModal }) {
 
                         <div className="flex items-center justify-between py-1 border-b border-slate-200/60">
                           <div>
-                            <span className="font-bold text-slate-800">2. ฝ่ายแผนงาน (Admin):</span>
-                            <div className="text-[11px] text-slate-500">admin.plan@ttc.ac.th (รหัสผ่าน: password123)</div>
+                            <span className="font-bold text-slate-800">2. ฝ่ายแผนงาน / แอดมิน (Admin):</span>
+                            <div className="text-[11px] text-slate-500">kanok@tl.ac.th หรือ admin.plan@ttc.ac.th (รหัส: password123)</div>
                           </div>
-                          <button 
-                            type="button"
-                            onClick={() => fillLoginForm('admin.plan@ttc.ac.th')}
-                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
-                          >
-                            เลือก
-                          </button>
+                          <div className="flex gap-1">
+                            <button 
+                              type="button"
+                              onClick={() => fillLoginForm('kanok@tl.ac.th')}
+                              className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium"
+                            >
+                              kanok
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => fillLoginForm('admin.plan@ttc.ac.th')}
+                              className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium"
+                            >
+                              admin
+                            </button>
+                          </div>
                         </div>
 
                         <div className="flex items-center justify-between py-1">
@@ -352,7 +361,7 @@ export default function AuthPage({ onOpenUseCaseModal }) {
                           <button 
                             type="button"
                             onClick={() => fillLoginForm('director@ttc.ac.th')}
-                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700"
+                            className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium"
                           >
                             เลือก
                           </button>

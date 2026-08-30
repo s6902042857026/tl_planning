@@ -24,6 +24,16 @@ export const INITIAL_USERS = [
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
   },
   {
+    id: 'usr_admin_2',
+    name: 'กนก ทองเนื้อดี',
+    email: 'kanok@tl.ac.th',
+    role: 'admin',
+    departmentId: 'dept_plan',
+    departmentName: 'งานพัฒนายุทธศาสตร์และแผนงาน',
+    position: 'ผู้ดูแลระบบ / ฝ่ายแผนงาน',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+  },
+  {
     id: 'usr_exec_1',
     name: 'ดร.ชาญชัย ชาญวิทย์',
     email: 'director@ttc.ac.th',

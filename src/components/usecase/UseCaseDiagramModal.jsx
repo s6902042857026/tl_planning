@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function UseCaseDiagramModal({ isOpen, onClose }) {
   const { switchRole, currentUser } = useAuth();
   const [hoveredActor, setHoveredActor] = useState(null);
-  const [selectedActor, setSelectedActor] = useState(currentUser.role);
+  const [selectedActor, setSelectedActor] = useState(currentUser?.role || 'user');
 
   if (!isOpen) return null;
 
